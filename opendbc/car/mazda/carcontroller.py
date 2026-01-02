@@ -1,10 +1,9 @@
 from opendbc.can import CANPacker
 from opendbc.car import Bus, structs
-from opendbc.car.lateral import apply_driver_steer_torque_limits
 from opendbc.car.interfaces import CarControllerBase
+from opendbc.car.lateral import apply_driver_steer_torque_limits
 from opendbc.car.mazda import mazdacan
-from opendbc.car.mazda.values import CarControllerParams, Buttons
-
+from opendbc.car.mazda.values import Buttons, CarControllerParams
 from opendbc.sunnypilot.car.mazda.icbm import IntelligentCruiseButtonManagementInterface
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -51,9 +50,10 @@ class CarController(CarControllerBase, IntelligentCruiseButtonManagementInterfac
     # send HUD alerts
     if self.frame % 50 == 0:
       ldw = CC.hudControl.visualAlert == VisualAlert.ldw
-      steer_required = CC.hudControl.visualAlert == VisualAlert.steerRequired
+      # steer_required = CC.hudControl.visualAlert == VisualAlert.steerRequired
       # TODO: find a way to silence audible warnings so we can add more hud alerts
-      steer_required = steer_required and CS.lkas_allowed_speed
+      # steer_required = steer_required and CS.lkas_allowed_speed
+      steer_required = CS.out.steerFaultTemporary
       can_sends.append(mazdacan.create_alert_command(self.packer, CS.cam_laneinfo, ldw, steer_required))
 
     # send steering command
